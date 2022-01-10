@@ -1,12 +1,13 @@
 {
   "main": "index.html",
+  "preload": "preload/index.js",
   "logo": "logo.png",
   "platform": ["win32", "darwin"],
   "features": [
     {
       "code": "ls",
       "explain": "展示已安装的 steam 游戏",
-      "cmds": ["steam", "shelper"]
+      "cmds": ["steam", "sth"]
     }
   ]
 }

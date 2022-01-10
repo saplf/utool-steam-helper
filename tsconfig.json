@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "module": "system",
+    "allowJs": true
+  },
+  "include": ["./types.d.ts"]
+}
