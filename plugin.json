@@ -1,0 +1,12 @@
+{
+  "main": "index.html",
+  "logo": "logo.png",
+  "platform": ["win32", "darwin"],
+  "features": [
+    {
+      "code": "ls",
+      "explain": "展示已安装的 steam 游戏",
+      "cmds": ["steam", "shelper"]
+    }
+  ]
+}
