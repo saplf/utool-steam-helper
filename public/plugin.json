@@ -7,7 +7,10 @@
     {
       "code": "ls",
       "explain": "展示已安装的 steam 游戏",
-      "cmds": ["steam", "sth"]
+      "cmds": ["steam", "game"]
     }
-  ]
+  ],
+  "development": {
+    "main": "http://localhost:3000/"
+  }
 }

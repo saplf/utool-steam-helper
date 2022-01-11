@@ -1,7 +1,25 @@
 {
   "compilerOptions": {
-    "module": "system",
-    "allowJs": true
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": true,
+    "skipLibCheck": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "typeRoots": ["node_modules/@types"],
+    "types": ["utools-api-types"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["./types.d.ts"]
+  "include": ["./src", "types.d.ts"]
 }
