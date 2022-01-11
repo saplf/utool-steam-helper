@@ -1,4 +1,5 @@
 import { parse } from '@node-steam/vdf';
+import { parseAppInfo } from './cypto';
 
 const numberReg = /^\d+$/;
 
@@ -27,10 +28,22 @@ export async function getAppList() {
   const contents = await Promise.all(
     simples.map((v) => window.getAppAcf(v.path, v.appid))
   );
+
+  const buffer = await window.getAppInfo();
+
+  let apps: any = {};
+  // todo: 由用户手动触发
+  // if (buffer) {
+  //   apps = await parseAppInfo(buffer);
+  // }
+
   return contents
     .map(parseVdf)
+    .map((it) => it.AppState)
+    .filter((it) => it && it.appid)
     .map((it) => ({
-      ...it.AppState,
-      ...window.getAppImages(it.AppState.appid),
+      ...it,
+      ...window.getAppImages(it.appid),
+      ...apps[it.appid],
     })) as Game.App[];
 }

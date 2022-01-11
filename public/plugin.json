@@ -7,7 +7,12 @@
     {
       "code": "ls",
       "explain": "展示已安装的 steam 游戏",
-      "cmds": ["steam", "game"]
+      "cmds": ["steam", "sgame"]
+    },
+    {
+      "code": "setting",
+      "explain": "steam 助手设置",
+      "cmds": ["ssetting"]
     }
   ],
   "development": {

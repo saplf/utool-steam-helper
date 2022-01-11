@@ -1,10 +1,11 @@
 import { getAppList } from '@/utils/steam';
-import { useEffect, useState } from 'react';
+import { addToolListener, removeToolListener } from '@/utils/utools';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function List() {
   const [appList, setAppList] = useState<Game.App[]>();
 
-  useEffect(() => {
+  const onPluginEnter = useCallback(() => {
     utools.setSubInput(
       (text: any) => {
         console.log(text);
@@ -12,20 +13,22 @@ export default function List() {
       '输入游戏名称进行筛选',
       true
     );
+  }, []);
 
+  useEffect(() => {
+    addToolListener('pluginEnter', onPluginEnter);
+    onPluginEnter();
     getAppList().then(setAppList);
+
+    return () => removeToolListener('pluginEnter', onPluginEnter);
   }, []);
 
   return (
     <div>
-      <span>游戏列表</span>
       {appList?.map((it) => (
         <div key={it.appid}>
-          <span>appid: {it.appid}</span>
-          <span>size: {it.SizeOnDisk}</span>
-          <span>name: {it.name}</span>
-          <span>image: {it.logo}</span>
-          <img width={80} src={`file:///${it.logo}`} />
+          {it.icon && <img width={40} src={`file:///${it.icon}`} />}
+          <span>{it.name}</span>
         </div>
       ))}
     </div>

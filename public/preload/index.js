@@ -9,6 +9,7 @@ if (utools.isWindows()) {
 const { getSteamAppPath } = serviceImpl;
 
 const imageMap = [
+  { key: 'icon', pattern: '{0}_icon.jpg' },
   { key: 'logo', pattern: '{0}_logo.png' },
   { key: 'heroBlur', pattern: '{0}_library_hero_blur.jpg' },
   { key: 'hero', pattern: '{0}_library_hero.jpg' },

@@ -1,8 +1,14 @@
 import ReactDOM from 'react-dom';
 import React, { useEffect, useState } from 'react';
 import List from './list';
+import Setting from './setting';
+import {
+  addToolListener,
+  initToolCallback,
+  removeToolListener,
+  PluginEnterCallback,
+} from './utils/utools';
 
-type PluginEnterCallback = Parameters<UToolsApi['onPluginEnter']>[0];
 type PluginEnterAction = Parameters<PluginEnterCallback>[0];
 
 function App() {
@@ -10,16 +16,23 @@ function App() {
   const { code } = action || {};
 
   useEffect(() => {
-    utools.onPluginEnter(setAction);
+    addToolListener('pluginEnter', setAction);
+    return () => removeToolListener('pluginEnter', setAction);
   }, []);
 
   if (code === 'ls') {
     return <List />;
   }
+  if (code === 'setting') {
+    return <Setting />;
+  }
+
   return null;
 }
 
 utools.onPluginReady(() => {
+  initToolCallback();
+
   ReactDOM.render(
     <React.StrictMode>
       <App />

@@ -1,4 +1,7 @@
+type Buffer = import('buffer').Buffer;
+
 type ImageProp = {
+  icon: string;
   logo: string;
   library: string;
   hero: string;
@@ -35,7 +38,7 @@ declare interface Window {
   /**
    * 获取应用信息
    */
-  getAppInfo(): Promise<Uint8Array | undefined>;
+  getAppInfo(): Promise<Buffer | undefined>;
 
   /**
    * 获取特定 app 的 acf 内容
@@ -55,6 +58,7 @@ declare namespace Game {
   };
 
   type App = {
+    // info from appid_.cvf
     appid: string;
     name: string;
     installdir: string;
@@ -73,5 +77,15 @@ declare namespace Game {
     ScheduledAutoUpdate: number;
     InstalledDepots: Depot[];
     UserConfig: { language: string };
+
+    // info from appinfo.vdf
+    size: number;
+    infoState: number;
+    lastUpdated: number,
+    picsToken: number;
+    sha1: string;
+    changeNumber: number;
+    props: any;
+    appinfo: any;
   } & ImageProp;
 }
