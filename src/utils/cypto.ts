@@ -35,7 +35,7 @@ function readAppInfoString(buffer: Buffer, offsetStart: number) {
   let offset = offsetStart;
   while (buffer.readUInt8(offset++) !== 0);
   return {
-    name: textDecoder.decode(buffer.subarray(offsetStart, offset - 1)),
+    value: textDecoder.decode(buffer.subarray(offsetStart, offset - 1)),
     offset,
   };
 }
@@ -46,7 +46,7 @@ function readAppInfoWideString(buffer: Buffer, offsetStart: number) {
     offset += 2;
   }
   return {
-    name: textDecoder.decode(buffer.subarray(offsetStart, offset)),
+    value: textDecoder.decode(buffer.subarray(offsetStart, offset)),
     offset,
   };
 }
@@ -59,25 +59,21 @@ function readColor(buffer: Buffer, offsetStart: number) {
   return { offset, color: { red, green, blue } };
 }
 
-function readPropertyTable(
-  buffer: Buffer,
-  offsetStart: number,
-  props: Record<string, any>
-) {
+function readPropertyTable(buffer: Buffer, offsetStart: number) {
+  const props: Record<string, any> = {};
   let offset = offsetStart;
   let type;
   while ((type = buffer.readUInt8(offset++)) !== appType.end) {
     let name;
     let value;
-    ({ name, offset } = readAppInfoString(buffer, offset));
+    ({ value: name, offset } = readAppInfoString(buffer, offset));
 
     switch (type) {
       case appType.table:
-        value = {};
-        offset = readPropertyTable(buffer, offset, value);
+        ({ offset, value } = readPropertyTable(buffer, offset));
         break;
       case appType.string:
-        ({ offset, name: value } = readAppInfoString(buffer, offset));
+        ({ offset, value } = readAppInfoString(buffer, offset));
         break;
       case appType.int32:
         value = buffer.readUInt32LE(offset);
@@ -88,7 +84,7 @@ function readPropertyTable(
         offset += 4;
         break;
       case appType.wstring:
-        ({ offset, name: value } = readAppInfoWideString(buffer, offset));
+        ({ offset, value } = readAppInfoWideString(buffer, offset));
         break;
       case appType.color:
         ({ offset, color: value } = readColor(buffer, offset));
@@ -103,7 +99,7 @@ function readPropertyTable(
     props[name] = value;
   }
 
-  return offset;
+  return { offset, value: props };
 }
 
 /**
@@ -140,8 +136,8 @@ export async function parseAppInfo(buffer: Buffer) {
     const changeNumber = buffer.readUInt32LE(offset);
     offset += 4;
 
-    const props: any = {};
-    offset = readPropertyTable(buffer, offset, props);
+    let props;
+    ({ offset, value: props } = readPropertyTable(buffer, offset));
     const { appinfo, ...others } = props;
 
     apps[appid] = {

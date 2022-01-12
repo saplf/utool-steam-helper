@@ -29,12 +29,13 @@ export async function getAppList() {
     simples.map((v) => window.getAppAcf(v.path, v.appid))
   );
 
-  const buffer = await window.getAppInfo();
+  // const buffer = await window.getAppInfo();
 
   let apps: any = {};
   // todo: 由用户手动触发
   // if (buffer) {
   //   apps = await parseAppInfo(buffer);
+  //   console.log(apps);
   // }
 
   return contents

@@ -9,6 +9,11 @@ type ImageProp = {
   header: string;
 };
 
+declare module '*.module.css' {
+  const classes: { readonly [key: string]: string };
+  export default classes;
+}
+
 declare interface Window {
   /**
    * 获取登录用户路径
@@ -81,7 +86,7 @@ declare namespace Game {
     // info from appinfo.vdf
     size: number;
     infoState: number;
-    lastUpdated: number,
+    lastUpdated: number;
     picsToken: number;
     sha1: string;
     changeNumber: number;

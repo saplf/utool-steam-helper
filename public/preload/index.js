@@ -6,7 +6,7 @@ if (utools.isWindows()) {
 } else if (utools.isMacOs()) {
   serviceImpl = require('./service.mac');
 }
-const { getSteamAppPath } = serviceImpl;
+const { getSteamAppPath: getSteamAppPathImpl } = serviceImpl;
 
 const imageMap = [
   { key: 'icon', pattern: '{0}_icon.jpg' },
@@ -17,18 +17,22 @@ const imageMap = [
   { key: 'header', pattern: '{0}_header.jpg' },
 ];
 
+function getSteamAppPath() {
+  return getSteamAppPathImpl?.() ?? '';
+}
+
 /**
  * 获取登录用户路径
  */
 window.getUserVdfPath = function () {
-  return getPathOf('userVdf', getSteamAppPath?.(), 'config', 'loginusers.vdf');
+  return getPathOf('userVdf', getSteamAppPath(), 'config', 'loginusers.vdf');
 };
 
 /**
  * 获取应用信息路径
  */
 window.getAppInfoPath = function () {
-  return getPathOf('appInfo', getSteamAppPath?.(), 'appcache', 'appinfo.vdf');
+  return getPathOf('appInfo', getSteamAppPath(), 'appcache', 'appinfo.vdf');
 };
 
 /**
@@ -37,7 +41,7 @@ window.getAppInfoPath = function () {
 window.getLibraryFoldersPath = function () {
   return getPathOf(
     'libraryFolders',
-    getSteamAppPath?.(),
+    getSteamAppPath(),
     'config',
     'libraryfolders.vdf'
   );
@@ -66,7 +70,7 @@ window.getAppImages = function (appid) {
       key,
       path: getPathOf(
         `${appid}_${key}_image`,
-        getSteamAppPath?.(),
+        getSteamAppPath(),
         'appcache',
         'librarycache',
         pattern.replace('{0}', appid)

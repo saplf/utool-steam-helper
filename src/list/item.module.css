@@ -1,0 +1,14 @@
+.item {
+  cursor: pointer;
+  height: 50px;
+  background-color: var(--item-bg);
+  padding: 0 10px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  &.selected {
+    background-color: var(--hover-color);
+  }
+}

@@ -1,5 +1,6 @@
 import ReactDOM from 'react-dom';
 import React, { useEffect, useState } from 'react';
+import './global.css';
 import List from './list';
 import Setting from './setting';
 import {

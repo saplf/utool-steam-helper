@@ -1,5 +1,7 @@
 {
   "main": "index.html",
+  "version": "0.0.1",
+  "author": "saplf",
   "preload": "preload/index.js",
   "logo": "logo.png",
   "platform": ["win32", "darwin"],
