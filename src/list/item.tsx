@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import styles from './item.module.css';
 
 type ListItemProps = {
@@ -21,6 +21,8 @@ export default function ListItem({
   onSelect,
   index,
 }: ListItemProps) {
+  const domRef = useRef<HTMLDivElement>(null);
+
   const onMouseEnter = useCallback(() => {
     onHover?.(item);
   }, [onHover, item]);
@@ -28,8 +30,16 @@ export default function ListItem({
     onSelect?.(item);
   }, [onSelect, item]);
 
+  useEffect(() => {
+    const dom = domRef.current;
+    if (select && dom) {
+      dom.scrollIntoView({ block: 'nearest' });
+    }
+  }, [select]);
+
   return (
     <div
+      ref={domRef}
       className={cn(styles.item, { [styles.selected]: select })}
       onClick={onClick}
       onMouseEnter={onMouseEnter}

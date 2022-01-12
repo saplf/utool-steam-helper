@@ -9,6 +9,6 @@
   align-items: center;
 
   &.selected {
-    background-color: var(--hover-color);
+    background-color: var(--item-hover-bg);
   }
 }

@@ -31,8 +31,20 @@ function App() {
   return null;
 }
 
+function initAppMode() {
+  if (utools.isDarkColors()) {
+    document.body.setAttribute('dark', '');
+  } else {
+    document.body.removeAttribute('dark');
+  }
+}
+
 utools.onPluginReady(() => {
   initToolCallback();
+  matchMedia('(prefers-color-scheme: dark)')?.addEventListener(
+    'change',
+    initAppMode
+  );
 
   ReactDOM.render(
     <React.StrictMode>
