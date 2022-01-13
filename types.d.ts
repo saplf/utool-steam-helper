@@ -16,19 +16,9 @@ declare module '*.module.css' {
 
 declare interface Window {
   /**
-   * 获取登录用户路径
+   * 获取 steam 安装路径
    */
-  getUserVdfPath(): string;
-
-  /**
-   * 获取应用信息路径
-   */
-  getAppInfoPath(): string;
-
-  /**
-   * 获取库文件夹配置文件路径
-   */
-  getLibraryFoldersPath(): string;
+  getSteamAppPath(): Promise<string>;
 
   /**
    * 获取用户信息
@@ -93,4 +83,12 @@ declare namespace Game {
     props: any;
     appinfo: any;
   } & ImageProp;
+
+  type ChangeInfo = {
+    id: number;
+    updateTime: number;
+    buildid: number;
+    size: number;
+    branch: string;
+  }
 }

@@ -1,8 +1,8 @@
 import ReactDOM from 'react-dom';
 import React, { useEffect, useState } from 'react';
 import './global.css';
-import List from './list';
-import Setting from './setting';
+import List from './pages/list';
+import Setting from './pages/setting';
 import {
   addToolListener,
   initToolCallback,
@@ -31,20 +31,8 @@ function App() {
   return null;
 }
 
-function initAppMode() {
-  if (utools.isDarkColors()) {
-    document.body.setAttribute('dark', '');
-  } else {
-    document.body.removeAttribute('dark');
-  }
-}
-
 utools.onPluginReady(() => {
   initToolCallback();
-  matchMedia('(prefers-color-scheme: dark)')?.addEventListener(
-    'change',
-    initAppMode
-  );
 
   ReactDOM.render(
     <React.StrictMode>

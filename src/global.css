@@ -1,20 +1,24 @@
-body {
-  --item-bg: #f5f5f533;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --common-bg: #303133;
+    --item-hover-bg: #515151;
+    --text-color: #f6f6f6;
+    --text-sub-color: #bbb;
+  }
+}
+
+:root {
+  --common-bg: #f5f5f533;
   --item-hover-bg: #ebebeb;
   --text-color: #212121;
   --text-sub-color: unset;
-}
-
-body[dark] {
-  --item-bg: transparent;
-  --item-hover-bg: #515151;
-  --text-color: #f6f6f6;
-  --text-sub-color: #bbb;
+  --animate-delay: 0.18s;
 }
 
 body {
+  background-color: var(--common-bg);
   color: var(--text-color);
-  transition: color .2s;
+  transition: color var(--animate-delay), background-color var(--animate-delay);
 }
 
 * {

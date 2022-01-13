@@ -60,7 +60,7 @@ function readColor(buffer: Buffer, offsetStart: number) {
 }
 
 function readPropertyTable(buffer: Buffer, offsetStart: number) {
-  const props: Record<string, any> = {};
+  let props: any = {};
   let offset = offsetStart;
   let type;
   while ((type = buffer.readUInt8(offset++)) !== appType.end) {
@@ -97,6 +97,10 @@ function readPropertyTable(buffer: Buffer, offsetStart: number) {
         throw `Unknown type ${type} of ${name}`;
     }
     props[name] = value;
+  }
+  const keys = Object.keys(props).map(parseFloat);
+  if (keys.every((it, i) => it === i)) {
+    props = keys.map((it) => props[it]);
   }
 
   return { offset, value: props };

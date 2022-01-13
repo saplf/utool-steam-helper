@@ -21,31 +21,7 @@ function getSteamAppPath() {
   return getSteamAppPathImpl?.() ?? '';
 }
 
-/**
- * 获取登录用户路径
- */
-window.getUserVdfPath = function () {
-  return getPathOf('userVdf', getSteamAppPath(), 'config', 'loginusers.vdf');
-};
-
-/**
- * 获取应用信息路径
- */
-window.getAppInfoPath = function () {
-  return getPathOf('appInfo', getSteamAppPath(), 'appcache', 'appinfo.vdf');
-};
-
-/**
- * 获取库文件夹配置文件路径
- */
-window.getLibraryFoldersPath = function () {
-  return getPathOf(
-    'libraryFolders',
-    getSteamAppPath(),
-    'config',
-    'libraryfolders.vdf'
-  );
-};
+window.getSteamAppPath = getSteamAppPath;
 
 /**
  * 获取某 steam library path 下某 appid 的 acf 内容
@@ -83,21 +59,32 @@ window.getAppImages = function (appid) {
  * 获取用户信息
  */
 window.getUserVdf = function () {
-  return getContentOf(window.getUserVdfPath());
+  return getContentOf(
+    getPathOf('userVdf', getSteamAppPath(), 'config', 'loginusers.vdf')
+  );
 };
 
 /**
  * 获取本地应用信息
  */
 window.getAppInfo = function () {
-  return getBinaryContentOf(window.getAppInfoPath());
+  return getBinaryContentOf(
+    getPathOf('appInfo', getSteamAppPath(), 'appcache', 'appinfo.vdf')
+  );
 };
 
 /**
  * 获取游戏库路径
  */
 window.getLibraryFolders = function () {
-  return getContentOf(window.getLibraryFoldersPath());
+  return getContentOf(
+    getPathOf(
+      'libraryFolders',
+      getSteamAppPath(),
+      'config',
+      'libraryfolders.vdf'
+    )
+  );
 };
 
 /**

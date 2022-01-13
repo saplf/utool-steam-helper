@@ -1,3 +1,4 @@
+import Image from '@/components/image';
 import cn from 'classnames';
 import { useCallback, useEffect, useRef } from 'react';
 import styles from './item.module.css';
@@ -44,7 +45,7 @@ export default function ListItem({
       onClick={onClick}
       onMouseEnter={onMouseEnter}
     >
-      <img src={`file:///${item.icon}`} />
+      <Image className={styles.image} src={item.icon} />
       <span>{item.name}</span>
     </div>
   );

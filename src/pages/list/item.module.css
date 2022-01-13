@@ -1,0 +1,22 @@
+.item {
+  cursor: pointer;
+  padding: 12px 10px;
+  box-sizing: border-size;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  & .image {
+    --size: 32px;
+    width: var(--size);
+    height: var(--size);
+    margin-right: 10px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  &.selected {
+    background-color: var(--item-hover-bg);
+  }
+}

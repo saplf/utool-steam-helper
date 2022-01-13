@@ -53,6 +53,7 @@ export default function List() {
   }, []);
 
   useEffect(() => {
+    console.log(appList);
     setSelected((prev) => {
       if (appList?.find((it) => it.appid === prev?.appid)) return prev;
       return appList?.[0];
@@ -61,9 +62,9 @@ export default function List() {
 
   return (
     <div className={styles.box}>
-      {selected?.library && (
+      {/* {selected?.library && (
         <img className={styles.bg} src={`file:///${selected.library}`} />
-      )}
+      )} */}
       <div className={styles.list}>
         {appList?.map((it, i) => (
           <ListItem
