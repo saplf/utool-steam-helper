@@ -11,6 +11,49 @@ export function parseVdf(text: string) {
   }
 }
 
+const steamLauncherReg = /^steam:\/\/.+$/;
+
+function matchOS(steamOsString: string) {
+  return (
+    (steamOsString === 'windows' && utools.isWindows()) ||
+    (steamOsString === 'linux' && utools.isLinux()) ||
+    (steamOsString === 'macos' && utools.isMacOs())
+  );
+}
+
+function refactorAppInfo(app: any): any {
+  const {
+    appinfo: { common, config: { installdir, launch } = {} as any } = {} as any,
+    appinfo,
+    panPath,
+    ...others
+  } = app;
+  const binary: any[] =
+    Object.values(launch ?? {}).filter(
+      (it: any) => !it.config || matchOS(it.config.oslist)
+    ) || [];
+
+  return {
+    ...others,
+    appinfo,
+    panPath,
+    launch: binary.map((it) => {
+      const { executable } = it;
+      if (steamLauncherReg.test(executable)) return executable;
+      return window.resolvePath(
+        panPath,
+        'steamapps',
+        'common',
+        installdir,
+        executable
+      );
+    }),
+  };
+}
+
+/**
+ * 获取游戏列表
+ */
 export async function getAppList() {
   // 获取多个 steam 库所在目录
   const result = parseVdf(await window.getLibraryFolders());
@@ -29,21 +72,21 @@ export async function getAppList() {
     simples.map((v) => window.getAppAcf(v.path, v.appid))
   );
 
-  const buffer = await window.getAppInfo();
-
   let apps: any = {};
   // todo: 由用户手动触发
+  const buffer = await window.getAppInfo();
   if (buffer) {
     apps = await parseAppInfo(buffer);
   }
 
   return contents
     .map(parseVdf)
-    .map((it) => it.AppState)
+    .map((it, i) => ({ ...it.AppState, panPath: simples[i]?.path }))
     .filter((it) => it && it.appid)
     .map((it) => ({
       ...it,
       ...window.getAppImages(it.appid),
       ...apps[it.appid],
-    })) as Game.App[];
+    }))
+    .map(refactorAppInfo) as Game.App[];
 }

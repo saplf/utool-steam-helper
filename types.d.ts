@@ -16,6 +16,11 @@ declare module '*.module.css' {
 
 declare interface Window {
   /**
+   * 解析路径
+   */
+  resolvePath(...paths: string[]): string;
+
+  /**
    * 获取 steam 安装路径
    */
   getSteamAppPath(): Promise<string>;

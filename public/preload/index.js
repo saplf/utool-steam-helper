@@ -1,3 +1,4 @@
+const path = require('path');
 const { getPathOf, getContentOf, getBinaryContentOf } = require('./service');
 
 let serviceImpl = {};
@@ -19,6 +20,10 @@ const imageMap = [
 
 function getSteamAppPath() {
   return getSteamAppPathImpl?.() ?? '';
+}
+
+window.resolvePath = function (...paths) {
+  return path.resolve(...paths);
 }
 
 window.getSteamAppPath = getSteamAppPath;
