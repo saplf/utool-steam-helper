@@ -9,6 +9,18 @@ type ImageProp = {
   header: string;
 };
 
+type ContentRet = {
+  mtime: number;
+  content?: string;
+  modified: boolean;
+};
+
+type BinaryContentRet = {
+  mtime: number;
+  content?: Buffer;
+  modified: boolean;
+};
+
 declare module '*.module.css' {
   const classes: { readonly [key: string]: string };
   export default classes;
@@ -23,27 +35,31 @@ declare interface Window {
   /**
    * 获取 steam 安装路径
    */
-  getSteamAppPath(): Promise<string>;
+  getSteamAppPath(mtime?: number): Promise<string>;
 
   /**
    * 获取用户信息
    */
-  getUserVdf(): Promise<string>;
+  getUserVdf(mtime?: number): Promise<ContentRet | null>;
 
   /**
    * 获取游戏库路径
    */
-  getLibraryFolders(): Promise<string>;
+  getLibraryFolders(mtime?: number): Promise<ContentRet | null>;
 
   /**
    * 获取应用信息
    */
-  getAppInfo(): Promise<Buffer | undefined>;
+  getAppInfo(mtime?: number): Promise<BinaryContentRet | null>;
 
   /**
    * 获取特定 app 的 acf 内容
    */
-  getAppAcf(libraryPath: string, appid: string | number): Promise<string>;
+  getAppAcf(
+    libraryPath: string,
+    appid: string | number,
+    mtime?: number
+  ): Promise<ContentRet | null>;
 
   /**
    * 获取某个应用的图片信息
@@ -57,10 +73,13 @@ declare namespace Game {
     size: number;
   };
 
+  type Mtime = Record<string, number>;
+
   type App = {
     // info from appid_.cvf
-    appid: string;
+    appid: number;
     name: string;
+    disk: string;
     installdir: string;
     StateFlags: number;
     LastUpdated: number;
@@ -95,5 +114,5 @@ declare namespace Game {
     buildid: number;
     size: number;
     branch: string;
-  }
+  };
 }

@@ -5,8 +5,8 @@ import ListItem from './item';
 import styles from './index.module.css';
 import useFn from '@/hooks/useFn';
 
-const keyDown = 'ArrowDown';
-const keyUp = 'ArrowUp';
+const KEY_DOWN = 'ArrowDown';
+const KEY_UP = 'ArrowUp';
 
 export default function List() {
   const [appList, setAppList] = useState<Game.App[]>();
@@ -20,6 +20,7 @@ export default function List() {
       '输入游戏名称进行筛选',
       true
     );
+    getAppList().then(setAppList);
   }, []);
 
   const onSelect = useCallback((item: Game.App) => {
@@ -29,12 +30,12 @@ export default function List() {
   const onKeyPress = useFn((ev: KeyboardEvent) => {
     if (!appList) return;
     const { key } = ev;
-    if (key !== keyDown && key !== keyUp) return;
+    if (key !== KEY_DOWN && key !== KEY_UP) return;
     ev.preventDefault();
     const currentIndex = appList.findIndex(
       (it) => it.appid === selected?.appid
     );
-    let nextIndex = currentIndex + (key === keyDown ? 1 : -1);
+    let nextIndex = currentIndex + (key === KEY_DOWN ? 1 : -1);
     if (nextIndex < 0) nextIndex = 0;
     if (nextIndex >= appList.length) nextIndex = appList.length - 1;
     setSelected(appList[nextIndex]);
@@ -43,7 +44,6 @@ export default function List() {
   useEffect(() => {
     addToolListener('pluginEnter', onPluginEnter);
     onPluginEnter();
-    getAppList().then(setAppList);
     document.onkeydown = onKeyPress;
 
     return () => {

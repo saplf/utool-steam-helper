@@ -22,23 +22,30 @@ function getSteamAppPath() {
   return getSteamAppPathImpl?.() ?? '';
 }
 
+/**
+ * 提供正确解析文件路径的方法
+ */
 window.resolvePath = function (...paths) {
   return path.resolve(...paths);
-}
+};
 
+/**
+ * steam 安装路径
+ */
 window.getSteamAppPath = getSteamAppPath;
 
 /**
  * 获取某 steam library path 下某 appid 的 acf 内容
  */
-window.getAppAcf = function (libraryPath, appid) {
+window.getAppAcf = function (libraryPath, appid, mtime) {
   return getContentOf(
     getPathOf(
       `acf_${appid}`,
       libraryPath,
       'steamapps',
       `appmanifest_${appid}.acf`
-    )
+    ),
+    mtime
   );
 };
 
@@ -63,32 +70,35 @@ window.getAppImages = function (appid) {
 /**
  * 获取用户信息
  */
-window.getUserVdf = function () {
+window.getUserVdf = function (mtime) {
   return getContentOf(
-    getPathOf('userVdf', getSteamAppPath(), 'config', 'loginusers.vdf')
+    getPathOf('userVdf', getSteamAppPath(), 'config', 'loginusers.vdf'),
+    mtime
   );
 };
 
 /**
  * 获取本地应用信息
  */
-window.getAppInfo = function () {
+window.getAppInfo = function (mtime) {
   return getBinaryContentOf(
-    getPathOf('appInfo', getSteamAppPath(), 'appcache', 'appinfo.vdf')
+    getPathOf('appInfo', getSteamAppPath(), 'appcache', 'appinfo.vdf'),
+    mtime
   );
 };
 
 /**
  * 获取游戏库路径
  */
-window.getLibraryFolders = function () {
+window.getLibraryFolders = function (mtime) {
   return getContentOf(
     getPathOf(
       'libraryFolders',
       getSteamAppPath(),
       'config',
       'libraryfolders.vdf'
-    )
+    ),
+    mtime
   );
 };
 

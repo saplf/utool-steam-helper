@@ -17,32 +17,68 @@ function getPathOf(key, ...paths) {
 }
 
 /**
- * 获取文件内容
+ * @typedef {Object} Ret
+ * @property {number} mtime
+ * @property {string} content
+ * @property {boolean} modified
+ *
+ * 获取文件内容，如果传入 lastModified，且文件未更改，则 content 为空
  *
  * @param {import('fs').PathLike} path
+ * @param {number=} lastModified
  * @param {BufferEncoding} encoding
+ *
+ * @returns {Promise<Ret?>}
  */
-function getContentOf(path, encoding = 'utf-8') {
-  if (!fs.existsSync(path)) return Promise.resolve('');
+function getContentOf(path, lastModified, encoding = 'utf-8') {
+  if (!fs.existsSync(path)) return Promise.resolve(null);
   return new Promise((resolve) => {
-    fs.readFile(path, { encoding }, (err, data) => {
-      resolve(err ? '' : data);
+    const stat = fs.statSync(path);
+    const mtime = +stat.mtime;
+    if (mtime === lastModified) {
+      resolve({ mtime, modified: false });
+      return;
+    }
+
+    fs.readFile(path, { encoding }, (err, content) => {
+      if (err) {
+        resolve(null);
+      } else {
+        resolve({ content, mtime, modified: true });
+      }
     });
   });
 }
 
 /**
+ * @typedef {Object} Ret
+ * @property {number} mtime
+ * @property {Uint8Array} content
+ * @property {boolean} modified
+ *
  * 获取文件二进制流
  *
  * @param {import('fs').PathLike} path
+ * @param {number=} lastModified
  *
- * @returns {Promise<Uint8Array | undefined>}
+ * @returns {Promise<Ret?>}
  */
-function getBinaryContentOf(path) {
-  if (!fs.existsSync(path)) return Promise.resolve(undefined);
+function getBinaryContentOf(path, lastModified) {
+  if (!fs.existsSync(path)) return Promise.resolve(null);
   return new Promise((resolve) => {
-    fs.readFile(path, (err, data) => {
-      resolve(err ? undefined : data);
+    const stat = fs.statSync(path);
+    const mtime = +stat.mtime;
+    if (mtime === lastModified) {
+      resolve({ mtime, modified: false });
+      return;
+    }
+
+    fs.readFile(path, (err, content) => {
+      if (err) {
+        resolve(null);
+      } else {
+        resolve({ content, mtime, modified: true });
+      }
     });
   });
 }
