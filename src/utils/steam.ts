@@ -1,7 +1,7 @@
 import { parse } from '@node-steam/vdf';
 import { parseAppInfo } from './decode';
-import { mapValues, promiseObject } from './helper';
-import { getStorage, setStorage } from './storage';
+import { filterNonnullValues, mapValues, promiseObject } from './helper';
+import { getStorage, removeStorage, setStorage } from './storage';
 
 const numberReg = /^\d+$/;
 const APPS_KEY = 'apps_key';
@@ -21,13 +21,12 @@ const mtimeKey = {
   },
 };
 
-const isUndefined = (v: any) => typeof v === 'undefined';
-
 export function parseVdf(text?: string) {
   try {
     if (!text) return null;
     return parse(text);
   } catch (error) {
+    console.error(error);
     return null;
   }
 }
@@ -46,7 +45,7 @@ function refactorAppInfo(app: any): any {
   const {
     appinfo: { common, config: { installdir, launch } = {} as any } = {} as any,
     appinfo,
-    panPath,
+    disk,
     ...others
   } = app;
   const binary: any[] =
@@ -57,12 +56,12 @@ function refactorAppInfo(app: any): any {
   return {
     ...others,
     appinfo,
-    panPath,
+    disk,
     launch: binary.map((it) => {
       const { executable } = it;
       if (steamLauncherReg.test(executable)) return executable;
       return window.resolvePath(
-        panPath,
+        disk,
         'steamapps',
         'common',
         installdir,
@@ -75,15 +74,16 @@ function refactorAppInfo(app: any): any {
 /**
  * 获取游戏列表
  */
-export async function getAppList() {
-  const mtimeStore = getStorage<Game.Mtime>(MTIME_KEY) || {};
+export async function getAppMap(): Promise<Record<string, Game.App>> {
+  // const mtimeStore = getStorage<Game.Mtime>(MTIME_KEY) || {};
+  const mtimeStore: Game.Mtime = {};
 
   // 获取多个 steam 库所在目录
-  let appCache = getStorage<Record<string, Game.App>>(APPS_KEY) || {};
+  const appCache = getStorage<Record<string, Game.App>>(APPS_KEY) || {};
   const libContent = await window.getLibraryFolders(
     mtimeStore[mtimeKey.libFolder]
   );
-  if (!libContent) return [];
+  if (!libContent) return {};
   // 简单的 app 信息
   type BriefType = { appid: number; disk: string; brief?: boolean };
   let brief: Record<string, BriefType> = appCache;
@@ -100,8 +100,8 @@ export async function getAppList() {
       });
       return prev;
     }, {});
+    if (!Object.keys(brief).length) return {};
   }
-  if (!Object.keys(brief).length) return [];
 
   // 解析对应 app 的 acf 文件内的信息
   const contents = await promiseObject(brief, (v) =>
@@ -113,24 +113,40 @@ export async function getAppList() {
   );
 
   // 从 appInfo 加载数据
-  let apps: any = appCache;
+  let apps: any = {};
   const buffer = await window.getAppInfo(mtimeStore[mtimeKey.appInfo]);
   if (buffer && buffer.modified) {
+    mtimeStore[mtimeKey.appInfo] = buffer.mtime;
     apps = (await parseAppInfo(buffer.content)) || {};
   }
 
-  mapValues(contents, v => {
-    
+  const appMap = mapValues(contents, (v, k) => {
+    if (!v) return null;
+    let origin: any;
+    if (v.modified) {
+      mtimeStore[mtimeKey.appAcf(k)] = v.mtime;
+      origin = parseVdf(v.content);
+    }
+    origin = {
+      disk: brief[k]?.disk,
+      ...origin,
+      ...window.getAppImages(k),
+      ...apps[k],
+    };
+    return { ...appCache[k], ...refactorAppInfo(origin) } as Game.App;
   });
 
-  // return contents
-  //   .map(parseVdf)
-  //   .map((it, i) => ({ ...it.AppState, disk: brief[i]?.path }))
-  //   .filter((it) => it && it.appid)
-  //   .map((it) => ({
-  //     ...it,
-  //     ...window.getAppImages(it.appid),
-  //     ...apps[it.appid],
-  //   }))
-  //   .map(refactorAppInfo) as Game.App[];
+  const result = filterNonnullValues(
+    appMap,
+    (it) => typeof it.appid !== 'undefined'
+  );
+
+  setStorage(MTIME_KEY, mtimeStore);
+  setStorage(APPS_KEY, result);
+
+  return result;
+}
+
+export async function getAppList() {
+  return Object.values(await getAppMap());
 }

@@ -89,7 +89,7 @@ function readPropertyTable(buffer: Buffer, offsetStart: number) {
         ({ offset, color: value } = readColor(buffer, offset));
         break;
       case appType.uint64:
-        value = buffer.readBigUInt64LE(offset);
+        value = buffer.readBigUInt64LE(offset).toString();
         offset += 8;
         break;
       default:
@@ -129,7 +129,7 @@ export async function parseAppInfo(buffer?: Buffer) {
     offset += 4;
     const lastUpdated = buffer.readUInt32LE(offset);
     offset += 4;
-    const picsToken = buffer.readBigUInt64LE(offset);
+    const picsToken = buffer.readBigUInt64LE(offset).toString();
     offset += 8;
     const sha1 = buffer
       .subarray(offset, offset + 20)

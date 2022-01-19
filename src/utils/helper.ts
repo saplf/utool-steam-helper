@@ -13,12 +13,27 @@ export async function promiseObject<T = unknown, R = any>(
 
 export function mapValues<T = unknown, R = any>(
   obj: Record<string, T>,
-  map: (v: T) => R
+  map: (v: T, key: string) => R
 ) {
   const keys = Object.keys(obj);
 
   return keys.reduce<Record<string, R>>((prev, cur, index) => {
-    prev[keys[index]] = map(obj[cur]);
+    prev[keys[index]] = map(obj[cur], keys[index]);
+    return prev;
+  }, {});
+}
+
+export function filterNonnullValues<T = unknown>(
+  obj: Record<string, T | null>,
+  filter?: (v: T) => boolean
+): Record<string, T> {
+  const keys = Object.keys(obj);
+
+  return keys.reduce<Record<string, T>>((prev, cur, index) => {
+    const target = obj[cur];
+    if (target && (!filter || filter(target))) {
+      prev[keys[index]] = target;
+    }
     return prev;
   }, {});
 }
