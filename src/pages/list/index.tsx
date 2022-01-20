@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ListItem from './item';
 import styles from './index.module.css';
 import useFn from '@/hooks/useFn';
+import useEnter from '@/hooks/useEnter';
 
 const KEY_DOWN = 'ArrowDown';
 const KEY_UP = 'ArrowUp';
@@ -12,7 +13,7 @@ export default function List() {
   const [appList, setAppList] = useState<Game.App[]>();
   const [selected, setSelected] = useState<Game.App>();
 
-  const onPluginEnter = useCallback(() => {
+  useEnter(() => {
     utools.setSubInput(
       (text: any) => {
         console.log(text);
@@ -20,8 +21,11 @@ export default function List() {
       '输入游戏名称进行筛选',
       true
     );
-    getAppList().then(setAppList);
-  }, []);
+    getAppList().then((list) => {
+      setAppList(list);
+      setSelected(list?.[0]);
+    });
+  });
 
   const onSelect = useCallback((item: Game.App) => {
     setSelected(item);
@@ -42,12 +46,9 @@ export default function List() {
   });
 
   useEffect(() => {
-    addToolListener('pluginEnter', onPluginEnter);
-    onPluginEnter();
     document.onkeydown = onKeyPress;
 
     return () => {
-      removeToolListener('pluginEnter', onPluginEnter);
       document.onkeydown = null;
     };
   }, []);

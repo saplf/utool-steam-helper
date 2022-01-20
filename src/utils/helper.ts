@@ -45,6 +45,32 @@ export function filterNonnullValues<T = unknown>(
 }
 
 /**
+ * 从解析的 vdf 中获取对应路径的值（会忽略 path 首字母的大小）
+ */
+export function getValue(
+  src: any,
+  paths: string[],
+  defaultValue = undefined
+): any {
+  let ret: any = src;
+  for (let p of paths) {
+    let v = ret?.[p];
+    if (typeof v === 'undefined') {
+      const [first, ...rest] = p;
+      const code = first.charCodeAt(0);
+      if (code < 65 || (code > 90 && code < 97) || code > 122) {
+        return defaultValue;
+      }
+      v = ret?.[`${String.fromCharCode(code ^ 32)}${rest.join('')}`];
+    }
+    ret = v;
+  }
+
+  if (typeof ret === 'undefined') return defaultValue;
+  return ret;
+}
+
+/**
  * 获取本地化的游戏名称
  */
 export function getGameName(game: Game.App): string {
@@ -86,6 +112,7 @@ export function setCurrentFriendId(id: string) {
 export function getPlayTime(game: Game.App) {
   if (!game.record) return '';
   const { playtime } = game.record!;
+  if (typeof playtime !== 'number') return `尚未游玩`;
   if (playtime < 60) return `已游玩${playtime}分钟`;
   return `已游玩${+Math.round(playtime / 60).toFixed(1)}小时`;
 }

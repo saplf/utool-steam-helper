@@ -3,6 +3,7 @@ import { parseAppInfo, parseBinaryData as parseBinaryData } from './decode';
 import {
   filterNonnullValues,
   getCurrentFriendId,
+  getValue,
   mapValues,
   promiseObject,
 } from './helper';
@@ -74,7 +75,7 @@ async function getTagInfo(mtimeStore: Game.Mtime) {
 /**
  * 获取用户信息
  */
-async function getUserInfo(mtimeStore: Game.Mtime): Promise<Game.Usage> {
+async function getUserInfo(mtimeStore: Game.Mtime): Promise<Game.Usage | null> {
   const id = await getCurrentFriendId();
   const key = getCurUserKey(id);
   let local = getStorage(key);
@@ -82,13 +83,14 @@ async function getUserInfo(mtimeStore: Game.Mtime): Promise<Game.Usage> {
     id,
     local ? mtimeStore[mtimeKey.user(id)] : undefined
   );
+  if (!info) return null;
   if (info.modified) {
     mtimeStore[mtimeKey.user(id)] = info.mtime;
     local = parseVdf(info.content)?.UserLocalConfigStore;
     if (!local) return local;
 
-    const friends = local?.Friends ?? {};
-    const apps = local?.Software?.Valve?.Steam?.Apps;
+    const friends = getValue(local, ['friends'], {});
+    const apps = getValue(local, ['software', 'valve', 'steam', 'apps']);
     local = {
       apps: mapValues(apps, (it: any) => ({
         lastPlayed: it.LastPlayed,

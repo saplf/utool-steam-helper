@@ -20,7 +20,9 @@ export default function Setting() {
   }, []);
 
   const onSelectUser = useCallback((e) => {
-    setCurrentFriendId(e.target.value);
+    const { value } = e.target;
+    setCurrentFriendId(value);
+    setCurrent(value);
   }, []);
 
   useEffect(() => {
