@@ -1,11 +1,19 @@
 import { parse } from '@node-steam/vdf';
-import { parseAppInfo } from './decode';
-import { filterNonnullValues, mapValues, promiseObject } from './helper';
+import { parseAppInfo, parseBinaryData as parseBinaryData } from './decode';
+import {
+  filterNonnullValues,
+  getCurrentFriendId,
+  mapValues,
+  promiseObject,
+} from './helper';
 import { getStorage, removeStorage, setStorage } from './storage';
 
 const numberReg = /^\d+$/;
 const APPS_KEY = 'apps_key';
 const MTIME_KEY = 'modified_time_key';
+const LOCALIZATION_KEY = 'localization_key';
+const getCurUserKey = (id: string) => `user_${id}_key`;
+const steamLauncherReg = /^steam:\/\/.+$/;
 
 const mtimeKey = {
   get libFolder() {
@@ -16,12 +24,20 @@ const mtimeKey = {
     return 'appConfig';
   },
 
+  get localization() {
+    return 'localization';
+  },
+
   appAcf(appId: number | string) {
     return `${appId}_acf`;
   },
+
+  user(friendId: string) {
+    return `${friendId}_user`;
+  },
 };
 
-export function parseVdf(text?: string) {
+function parseVdf(text?: string) {
   try {
     if (!text) return null;
     return parse(text);
@@ -31,8 +47,6 @@ export function parseVdf(text?: string) {
   }
 }
 
-const steamLauncherReg = /^steam:\/\/.+$/;
-
 function matchOS(steamOsString: string) {
   return (
     (steamOsString === 'windows' && utools.isWindows()) ||
@@ -41,43 +55,110 @@ function matchOS(steamOsString: string) {
   );
 }
 
-function refactorAppInfo(app: any): any {
-  const {
-    appinfo: { common, config: { installdir, launch } = {} as any } = {} as any,
-    appinfo,
-    disk,
-    ...others
-  } = app;
-  const binary: any[] =
-    Object.values(launch ?? {}).filter(
-      (it: any) => !it.config || matchOS(it.config.oslist)
-    ) || [];
+/**
+ * 获取 tag info
+ */
+async function getTagInfo(mtimeStore: Game.Mtime) {
+  let local = getStorage(LOCALIZATION_KEY);
+  const info = await window.getLocalization(
+    local ? mtimeStore[mtimeKey.localization] : undefined
+  );
+  if (info.modified) {
+    mtimeStore[mtimeKey.localization] = info.mtime;
+    local = parseVdf(info.content)?.localization;
+    setStorage(LOCALIZATION_KEY, local);
+  }
+  return local;
+}
 
-  return {
-    ...others,
+/**
+ * 获取用户信息
+ */
+async function getUserInfo(mtimeStore: Game.Mtime): Promise<Game.Usage> {
+  const id = await getCurrentFriendId();
+  const key = getCurUserKey(id);
+  let local = getStorage(key);
+  const info = await window.getLoggedUserInfo(
+    id,
+    local ? mtimeStore[mtimeKey.user(id)] : undefined
+  );
+  if (info.modified) {
+    mtimeStore[mtimeKey.user(id)] = info.mtime;
+    local = parseVdf(info.content)?.UserLocalConfigStore;
+    if (!local) return local;
+
+    const friends = local?.Friends ?? {};
+    const apps = local?.Software?.Valve?.Steam?.Apps;
+    local = {
+      apps: mapValues(apps, (it: any) => ({
+        lastPlayed: it.LastPlayed,
+        playtime: it.Playtime,
+      })),
+      id,
+      user: friends[id],
+    };
+    setStorage(key, local);
+  }
+  return local;
+}
+
+/**
+ * 重新组合获取到的 appinfo
+ */
+function refactorAppInfo(app?: any, localization?: any): Game.App {
+  if (!app) return app;
+  const {
+    appinfo: {
+      common: {
+        type,
+        name_localized,
+        store_tags,
+        workshop_visible,
+      } = {} as any,
+      config: { installdir, launch } = {} as any,
+    } = {} as any,
     appinfo,
     disk,
-    launch: binary.map((it) => {
-      const { executable } = it;
-      if (steamLauncherReg.test(executable)) return executable;
-      return window.resolvePath(
-        disk,
-        'steamapps',
-        'common',
-        installdir,
-        executable
-      );
-    }),
+  } = app;
+
+  let override: any = {
+    name: { ...name_localized, english: app.name },
   };
+  if (appinfo) {
+    const binary: any[] =
+      Object.values(launch ?? {}).filter(
+        (it: any) => !it.config || matchOS(it.config.oslist)
+      ) || [];
+    override = {
+      ...override,
+      type,
+      supportWorkshop: workshop_visible == 1,
+      storeTags: mapValues(localization, (v: any) => {
+        return store_tags?.map((id: number) => v.store_tags?.[id]) || [];
+      }),
+      launch: binary.map((it) => {
+        const { executable } = it;
+        if (steamLauncherReg.test(executable)) return executable;
+        return window.resolvePath(
+          disk,
+          'steamapps',
+          'common',
+          installdir,
+          executable
+        );
+      }),
+    };
+  }
+
+  return { ...app, ...override };
 }
 
 /**
  * 获取游戏列表
  */
-export async function getAppMap(): Promise<Record<string, Game.App>> {
-  // const mtimeStore = getStorage<Game.Mtime>(MTIME_KEY) || {};
-  const mtimeStore: Game.Mtime = {};
-
+export async function getAppMap(
+  mtimeStore: Game.Mtime
+): Promise<Record<string, Game.App>> {
   // 获取多个 steam 库所在目录
   const appCache = getStorage<Record<string, Game.App>>(APPS_KEY) || {};
   const libContent = await window.getLibraryFolders(
@@ -120,20 +201,23 @@ export async function getAppMap(): Promise<Record<string, Game.App>> {
     apps = (await parseAppInfo(buffer.content)) || {};
   }
 
+  const localizations = await getTagInfo(mtimeStore);
   const appMap = mapValues(contents, (v, k) => {
     if (!v) return null;
     let origin: any;
     if (v.modified) {
       mtimeStore[mtimeKey.appAcf(k)] = v.mtime;
-      origin = parseVdf(v.content);
+      origin = {
+        disk: brief[k]?.disk,
+        ...parseVdf(v.content)?.AppState,
+        ...window.getAppImages(k),
+        ...apps[k],
+      };
     }
-    origin = {
-      disk: brief[k]?.disk,
-      ...origin,
-      ...window.getAppImages(k),
-      ...apps[k],
-    };
-    return { ...appCache[k], ...refactorAppInfo(origin) } as Game.App;
+    return {
+      ...appCache[k],
+      ...refactorAppInfo(origin, localizations),
+    } as Game.App;
   });
 
   const result = filterNonnullValues(
@@ -141,12 +225,30 @@ export async function getAppMap(): Promise<Record<string, Game.App>> {
     (it) => typeof it.appid !== 'undefined'
   );
 
-  setStorage(MTIME_KEY, mtimeStore);
   setStorage(APPS_KEY, result);
-
   return result;
 }
 
 export async function getAppList() {
-  return Object.values(await getAppMap());
+  const mtimeStore = getStorage<Game.Mtime>(MTIME_KEY) || {};
+  // const mtimeStore: Game.Mtime = {};
+  const user = await getUserInfo(mtimeStore);
+  const app = mapValues(await getAppMap(mtimeStore), (it) => ({
+    ...it,
+    record: user?.apps?.[it.appid],
+  }));
+  setStorage(MTIME_KEY, mtimeStore);
+
+  console.log(user, app);
+  return Object.values(app);
+}
+
+/**
+ * 成就相关
+ */
+export async function getAppStats(appid: number) {
+  const schema = await window.getUserGameStatsSchema(appid);
+  const result = parseBinaryData(schema.content)?.[appid];
+  console.log(result);
+  return result;
 }

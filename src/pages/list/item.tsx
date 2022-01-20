@@ -1,4 +1,5 @@
 import Image from '@/components/image';
+import { getGameName, getGameTags, getPlayTime } from '@/utils/helper';
 import cn from 'classnames';
 import { useCallback, useEffect, useRef } from 'react';
 import styles from './item.module.css';
@@ -38,6 +39,9 @@ export default function ListItem({
     }
   }, [select]);
 
+  const playtime = getPlayTime(item) || null;
+  const appid = item.appid || null;
+
   return (
     <div
       ref={domRef}
@@ -46,7 +50,24 @@ export default function ListItem({
       onMouseEnter={onMouseEnter}
     >
       <Image className={styles.image} src={item.icon} />
-      <span>{item.name}</span>
+      <div className={styles.info}>
+        <div className={styles.main}>
+          {appid && (
+            <span className={cn(styles.appid, styles.tagUI)}>appid: {appid}</span>
+          )}
+          {playtime && (
+            <span className={cn(styles.time, styles.tagUI)}>{playtime}</span>
+          )}
+          <span className={styles.name}>{getGameName(item)}</span>
+        </div>
+        <div className={styles.sub}>
+          {getGameTags(item).map((it, i) => (
+            <span key={i} className={styles.tag}>
+              {it}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

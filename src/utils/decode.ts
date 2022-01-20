@@ -61,10 +61,10 @@ function readColor(buffer: Buffer, offsetStart: number) {
 function readPropertyTable(buffer: Buffer, offsetStart: number) {
   let props: any = {};
   let offset = offsetStart;
-  let type;
+  let type: number;
   while ((type = buffer.readUInt8(offset++)) !== appType.end) {
-    let name;
-    let value;
+    let name: string;
+    let value: any;
     ({ value: name, offset } = readAppInfoString(buffer, offset));
 
     switch (type) {
@@ -139,7 +139,7 @@ export async function parseAppInfo(buffer?: Buffer) {
     const changeNumber = buffer.readUInt32LE(offset);
     offset += 4;
 
-    let props;
+    let props: any;
     ({ offset, value: props } = readPropertyTable(buffer, offset));
     const { appinfo, ...others } = props;
 
@@ -156,4 +156,9 @@ export async function parseAppInfo(buffer?: Buffer) {
     };
   }
   return apps;
+}
+
+export function parseBinaryData(buffer?: Buffer) {
+  if (!buffer) return null;
+  return readPropertyTable(buffer, 0).value;
 }

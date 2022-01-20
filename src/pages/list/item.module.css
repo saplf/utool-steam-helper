@@ -19,4 +19,59 @@
   &.selected {
     background-color: var(--item-hover-bg);
   }
+
+  & .main {
+    display: flex;
+    align-items: center;
+  }
+
+  & .tagUI {
+    --height: 14px;
+    height: var(--height);
+    line-height: var(--height);
+    font-size: 10px;
+    padding: 0 4px;
+    border-radius: 2px;
+    border: 1px solid #000;
+    margin-right: 4px;
+  }
+
+  & .appid {
+    color: var(--tag-blue);
+    border-color: var(--tag-blue);
+  }
+
+  & .time {
+    color: var(--tag-red);
+    border-color: var(--tag-red);
+  }
+
+  & .name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  & .info {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .sub {
+    margin-top: 4px;
+    display: flex;
+    font-size: 12px;
+    color: var(--text-sub-color);
+  }
+
+  & .tag {
+    white-space: nowrap;
+  }
+
+  & .tag:nth-last-child(n + 2) {
+    margin-right: 6px;
+  }
 }

@@ -1,9 +1,11 @@
 @media (prefers-color-scheme: dark) {
-  :root {
+  body {
     --common-bg: #303133;
     --item-hover-bg: #515151;
     --text-color: #f6f6f6;
     --text-sub-color: #bbb;
+    --tag-red: #e0529c;
+    --tag-blue: #3c9ae8;
   }
 }
 
@@ -11,7 +13,9 @@
   --common-bg: #f5f5f533;
   --item-hover-bg: #ebebeb;
   --text-color: #212121;
-  --text-sub-color: unset;
+  --text-sub-color: #787878;
+  --tag-red: #cf1322;
+  --tag-blue: #1d39c4;
   --animate-delay: 0.18s;
 }
 

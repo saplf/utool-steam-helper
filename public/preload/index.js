@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const { getPathOf, getContentOf, getBinaryContentOf } = require('./service');
 
 let serviceImpl = {};
@@ -78,11 +79,94 @@ window.getUserVdf = function (mtime) {
 };
 
 /**
+ * 获取登录过的用户 friend id
+ */
+window.getLoggedFriendId = function (mtime) {
+  const userDir = getPathOf('userDir', getSteamAppPath(), 'userdata');
+  if (!userDir) return Promise.resolve([]);
+  return new Promise((resolve) => {
+    fs.readdir(userDir, (err, files) => {
+      resolve(
+        err
+          ? []
+          : files.filter((it) =>
+              fs.statSync(path.resolve(userDir, it)).isDirectory()
+            )
+      );
+    });
+  });
+};
+
+/**
+ * 根据 friend id 获取详细的信息
+ */
+window.getLoggedUserInfo = function (friendId, mtime) {
+  return getContentOf(
+    getPathOf(
+      `${friendId}_logged_userInfo`,
+      getSteamAppPath(),
+      'userdata',
+      `${friendId}`,
+      'config',
+      'localconfig.vdf'
+    ),
+    mtime
+  );
+};
+
+/**
  * 获取本地应用信息
  */
 window.getAppInfo = function (mtime) {
   return getBinaryContentOf(
     getPathOf('appInfo', getSteamAppPath(), 'appcache', 'appinfo.vdf'),
+    mtime
+  );
+};
+
+/**
+ * 获取本地应用信息
+ */
+window.getLocalization = function (mtime) {
+  return getContentOf(
+    getPathOf(
+      'localization',
+      getSteamAppPath(),
+      'appcache',
+      'localization.vdf'
+    ),
+    mtime
+  );
+};
+
+/**
+ * 获取应用的成就信息
+ */
+window.getUserGameStatsSchema = function (appid, mtime) {
+  return getBinaryContentOf(
+    getPathOf(
+      `${appid}_stats_schema`,
+      getSteamAppPath(),
+      'appcache',
+      'stats',
+      `UserGameStatsSchema_${appid}.bin`
+    ),
+    mtime
+  );
+};
+
+/**
+ * 获取用户的成就信息
+ */
+window.getUserGameStats = function (friendId, appid, mtime) {
+  return getBinaryContentOf(
+    getPathOf(
+      `${appid}_stats`,
+      getSteamAppPath(),
+      'appcache',
+      'stats',
+      `UserGameStats_${friendId}_${appid}.bin`
+    ),
     mtime
   );
 };
