@@ -144,8 +144,16 @@ export function orderGameList(
     list = list.filter(({ name }) => {
       const { english, schinese, tchinese } = name;
       if (english && english.toLowerCase().includes(query)) return true;
-      if (schinese && match(schinese, query)) return true;
-      if (tchinese && match(tchinese, query)) return true;
+      if (
+        schinese &&
+        (schinese.toLowerCase().includes(query) || match(schinese, query))
+      )
+        return true;
+      if (
+        tchinese &&
+        (tchinese.toLowerCase().includes(query) || match(tchinese, query))
+      )
+        return true;
       return false;
     });
   }
