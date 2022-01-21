@@ -16,6 +16,16 @@
 
 - 选择 `dist/plugin.json` 作为入口
 
+## 开发计划
+
+- [x] steam 游戏列表的查询与启动
+
+- [ ] 设置页面的完善
+
+- [ ] 支持自定义添加游戏
+
+- [ ] 支持跳过 steam 某个游戏的更新
+
 ## 鸣谢
 
 - [utools](https://u.tools/docs/guide/about-uTools.html)
