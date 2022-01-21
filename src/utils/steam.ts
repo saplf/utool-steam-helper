@@ -4,10 +4,11 @@ import {
   filterNonnullValues,
   getCurrentFriendId,
   getValue,
+  invalidCache,
   mapValues,
   promiseObject,
 } from './helper';
-import { getStorage, removeStorage, setStorage } from './storage';
+import { getStorage, setStorage } from './storage';
 
 const numberReg = /^\d+$/;
 const APPS_KEY = 'apps_key';
@@ -60,11 +61,11 @@ function matchOS(steamOsString: string) {
  * 获取 tag info
  */
 async function getTagInfo(mtimeStore: Game.Mtime) {
-  let local = getStorage(LOCALIZATION_KEY);
+  let local = invalidCache() ? undefined : getStorage(LOCALIZATION_KEY);
   const info = await window.getLocalization(
     local ? mtimeStore[mtimeKey.localization] : undefined
   );
-  if (info.modified) {
+  if (info?.modified) {
     mtimeStore[mtimeKey.localization] = info.mtime;
     local = parseVdf(info.content)?.localization;
     setStorage(LOCALIZATION_KEY, local);
@@ -162,7 +163,9 @@ export async function getAppMap(
   mtimeStore: Game.Mtime
 ): Promise<Record<string, Game.App>> {
   // 获取多个 steam 库所在目录
-  const appCache = getStorage<Record<string, Game.App>>(APPS_KEY) || {};
+  const appCache = invalidCache()
+    ? {}
+    : getStorage<Record<string, Game.App>>(APPS_KEY) || {};
   const libContent = await window.getLibraryFolders(
     mtimeStore[mtimeKey.libFolder]
   );
@@ -210,6 +213,7 @@ export async function getAppMap(
     if (v.modified) {
       mtimeStore[mtimeKey.appAcf(k)] = v.mtime;
       origin = {
+        appinfo: appCache[k]?.appinfo,
         disk: brief[k]?.disk,
         ...parseVdf(v.content)?.AppState,
         ...window.getAppImages(k),
@@ -232,17 +236,16 @@ export async function getAppMap(
 }
 
 export async function getAppList() {
-  const mtimeStore = getStorage<Game.Mtime>(MTIME_KEY) || {};
-  // const mtimeStore: Game.Mtime = {};
+  const mtimeStore = invalidCache()
+    ? {}
+    : getStorage<Game.Mtime>(MTIME_KEY) || {};
   const user = await getUserInfo(mtimeStore);
   const app = mapValues(await getAppMap(mtimeStore), (it) => ({
     ...it,
     record: user?.apps?.[it.appid],
   }));
   setStorage(MTIME_KEY, mtimeStore);
-
-  console.log(user, app);
-  return Object.values(app);
+  return app;
 }
 
 /**

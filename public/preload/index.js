@@ -190,3 +190,15 @@ window.getLibraryFolders = function (mtime) {
  * 获取 steam 应用所在路径
  */
 window.getSteamAppPath = serviceImpl.getSteamAppPath;
+
+/**
+ * 启动游戏
+ * @param {Game.App} game
+ */
+window.launchGame = function (game) {
+  const { appid, launch } = game;
+  if (!appid) return;
+  window.utools.hideMainWindow();
+  window.utools.shellOpenExternal(`steam://rungameid/${item.appid}`);
+  // window.utools.shellOpenPath(launch[0]);
+}

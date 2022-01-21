@@ -1,3 +1,4 @@
+import { match } from 'pinyin-pro';
 import { getStorage, setStorage } from './storage';
 
 const CURRENT_USER_ID = 'current user id';
@@ -42,6 +43,14 @@ export function filterNonnullValues<T = unknown>(
     }
     return prev;
   }, {});
+}
+
+/**
+ * 是否不使用缓存
+ * todo 根据版本判断
+ */
+export function invalidCache() {
+  return false;
 }
 
 /**
@@ -101,6 +110,9 @@ export async function getCurrentFriendId(): Promise<string | null> {
   return currentFriendId;
 }
 
+/**
+ * 设置当前使用的用户 friend id
+ */
 export function setCurrentFriendId(id: string) {
   currentFriendId = id;
   setStorage(CURRENT_USER_ID, id);
@@ -112,7 +124,38 @@ export function setCurrentFriendId(id: string) {
 export function getPlayTime(game: Game.App) {
   if (!game.record) return '';
   const { playtime } = game.record!;
-  if (typeof playtime !== 'number') return `尚未游玩`;
-  if (playtime < 60) return `已游玩${playtime}分钟`;
-  return `已游玩${+Math.round(playtime / 60).toFixed(1)}小时`;
+  if (typeof playtime !== 'number') return '';
+  if (playtime < 60) return `${playtime}分钟`;
+  return `${+Math.round(playtime / 60).toFixed(1)}小时`;
+}
+
+/**
+ * 根据规则/筛选排序列表
+ */
+export function orderGameList(
+  apps?: Record<string, Game.App>,
+  option?: { query?: string }
+): Game.App[] {
+  if (!apps) return [];
+  let { query } = option || {};
+  query = query?.toLocaleLowerCase();
+  let list = Object.values(apps);
+  if (query) {
+    list = list.filter(({ name }) => {
+      const { english, schinese, tchinese } = name;
+      if (english && english.toLowerCase().includes(query)) return true;
+      if (schinese && match(schinese, query)) return true;
+      if (tchinese && match(tchinese, query)) return true;
+      return false;
+    });
+  }
+  list = list.sort((a, b) => {
+    const { playtime: aTime } = a.record || {};
+    const { playtime: bTime } = b.record || {};
+    if (typeof aTime !== 'number') return 1;
+    if (typeof bTime !== 'number') return -1;
+    return bTime - aTime;
+  });
+
+  return list;
 }

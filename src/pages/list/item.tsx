@@ -53,10 +53,14 @@ export default function ListItem({
       <div className={styles.info}>
         <div className={styles.main}>
           {appid && (
-            <span className={cn(styles.appid, styles.tagUI)}>appid: {appid}</span>
+            <span className={cn(styles.appid, styles.tagUI)} title="appid">
+              {appid}
+            </span>
           )}
           {playtime && (
-            <span className={cn(styles.time, styles.tagUI)}>{playtime}</span>
+            <span className={cn(styles.time, styles.tagUI)} title="已游玩时间">
+              {playtime}
+            </span>
           )}
           <span className={styles.name}>{getGameName(item)}</span>
         </div>

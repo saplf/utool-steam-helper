@@ -16,7 +16,7 @@ export default function Setting() {
   }, []);
 
   const onClick = useCallback(() => {
-    parseHistoryInfo(1127400).then(setContents);
+    // parseHistoryInfo(1127400).then(setContents);
   }, []);
 
   const onSelectUser = useCallback((e) => {
@@ -33,10 +33,10 @@ export default function Setting() {
 
   return (
     <div>
-      {/* <button onClick={onClick}>点击获取</button> */}
+      {/* <button onClick={onClick}>点击获取</button>
       {contents?.map((it, i) => (
         <div key={i}>{it}</div>
-      ))}
+      ))} */}
 
       <div>
         <span>设置用户</span>

@@ -626,6 +626,11 @@ picomatch@^2.2.2:
   resolved "https://registry.npmmirror.com/picomatch/download/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
+pinyin-pro@^3.7.1:
+  version "3.7.1"
+  resolved "https://registry.npmmirror.com/pinyin-pro/download/pinyin-pro-3.7.1.tgz#bd9e5e15bb90646301ae70de8b1dfa35e675e8b4"
+  integrity sha512-CltpMsTnTp1H5F6QoO/vyCKNaC10iJP6YyGWK6ph9OMoV+N9fEA71rk4gnXNtioSVf58Pwight+eNlRAoOCsIQ==
+
 postcss-nesting@^10.1.1:
   version "10.1.1"
   resolved "https://registry.npmmirror.com/postcss-nesting/download/postcss-nesting-10.1.1.tgz#d5574e69f66b9f44f73143ce1e161d32b917df87"

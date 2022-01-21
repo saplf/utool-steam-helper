@@ -100,6 +100,11 @@ declare interface Window {
    * 获取某个应用的图片信息
    */
   getAppImages(appid: string): ImageProp;
+
+  /**
+   * 启动游戏
+   */
+  launchGame(game: Game.App): void;
 }
 
 declare namespace Game {
@@ -152,6 +157,11 @@ declare namespace Game {
      * 用户游玩时间
      */
     record?: GameRecord;
+
+    /**
+     * 游戏启动项
+     */
+    launch: string[];
 
     installdir: string;
     StateFlags: number;

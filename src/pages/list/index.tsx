@@ -1,30 +1,33 @@
 import { getAppList } from '@/utils/steam';
 import { addToolListener, removeToolListener } from '@/utils/utools';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ListItem from './item';
 import styles from './index.module.css';
 import useFn from '@/hooks/useFn';
 import useEnter from '@/hooks/useEnter';
+import { orderGameList } from '@/utils/helper';
 
 const KEY_DOWN = 'ArrowDown';
 const KEY_UP = 'ArrowUp';
+const KEY_ENTER = 'Enter';
 
 export default function List() {
-  const [appList, setAppList] = useState<Game.App[]>();
+  const [apps, setApps] = useState<Record<string, Game.App>>();
   const [selected, setSelected] = useState<Game.App>();
+  const [query, setQuery] = useState('');
+  const appList = useMemo(() => orderGameList(apps, { query }), [apps, query]);
 
   useEnter(() => {
     utools.setSubInput(
       (text: any) => {
-        console.log(text);
+        setQuery(text.text);
       },
       '输入游戏名称进行筛选',
       true
     );
-    getAppList().then((list) => {
-      setAppList(list);
-      setSelected(list?.[0]);
-    });
+    setQuery('');
+    setSelected(undefined);
+    getAppList().then(setApps);
   });
 
   const onSelect = useCallback((item: Game.App) => {
@@ -34,8 +37,15 @@ export default function List() {
   const onKeyPress = useFn((ev: KeyboardEvent) => {
     if (!appList) return;
     const { key } = ev;
-    if (key !== KEY_DOWN && key !== KEY_UP) return;
+    if (key !== KEY_DOWN && key !== KEY_UP && key !== KEY_ENTER) return;
     ev.preventDefault();
+
+    if (key === KEY_ENTER) {
+      if (!selected) return;
+      window.launchGame(selected);
+      return;
+    }
+
     const currentIndex = appList.findIndex(
       (it) => it.appid === selected?.appid
     );
@@ -54,7 +64,6 @@ export default function List() {
   }, []);
 
   useEffect(() => {
-    console.log(appList);
     setSelected((prev) => {
       if (appList?.find((it) => it.appid === prev?.appid)) return prev;
       return appList?.[0];
@@ -63,9 +72,6 @@ export default function List() {
 
   return (
     <div className={styles.box}>
-      {/* {selected?.library && (
-        <img className={styles.bg} src={`file:///${selected.library}`} />
-      )} */}
       <div className={styles.list}>
         {appList?.map((it, i) => (
           <ListItem
@@ -74,6 +80,7 @@ export default function List() {
             select={selected?.appid === it.appid}
             index={i}
             onHover={onSelect}
+            onSelect={window.launchGame}
           />
         ))}
       </div>
