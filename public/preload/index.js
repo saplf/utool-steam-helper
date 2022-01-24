@@ -199,6 +199,6 @@ window.launchGame = function (game) {
   const { appid, launch } = game;
   if (!appid) return;
   window.utools.hideMainWindow();
-  window.utools.shellOpenExternal(`steam://rungameid/${item.appid}`);
+  window.utools.shellOpenExternal(`steam://rungameid/${appid}`);
   // window.utools.shellOpenPath(launch[0]);
 }
