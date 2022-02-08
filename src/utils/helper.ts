@@ -143,18 +143,12 @@ export function orderGameList(
   if (query) {
     list = list.filter(({ name }) => {
       const { english, schinese, tchinese } = name;
-      if (english && english.toLowerCase().includes(query)) return true;
-      if (
-        schinese &&
-        (schinese.toLowerCase().includes(query) || match(schinese, query))
-      )
-        return true;
-      if (
-        tchinese &&
-        (tchinese.toLowerCase().includes(query) || match(tchinese, query))
-      )
-        return true;
-      return false;
+      const content = [
+        english?.toLowerCase() || '',
+        schinese?.toLowerCase() || '',
+        tchinese?.toLowerCase() || '',
+      ].join(' ');
+      return content.includes(query) || !!match(content, query);
     });
   }
   list = list.sort((a, b) => {

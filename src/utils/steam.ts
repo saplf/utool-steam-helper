@@ -254,6 +254,5 @@ export async function getAppList() {
 export async function getAppStats(appid: number) {
   const schema = await window.getUserGameStatsSchema(appid);
   const result = parseBinaryData(schema.content)?.[appid];
-  console.log(result);
   return result;
 }
