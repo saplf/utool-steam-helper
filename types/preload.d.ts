@@ -21,11 +21,6 @@ type BinaryContentRet = {
   modified: boolean;
 };
 
-declare module '*.module.css' {
-  const classes: { readonly [key: string]: string };
-  export default classes;
-}
-
 declare interface Window {
   /**
    * 解析路径

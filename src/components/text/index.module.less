@@ -1,0 +1,29 @@
+.text {
+  --color: #212121;
+  --secondary-color: #787878;
+
+  @media (prefers-color-scheme: dark) {
+    --color: #f6f6f6;
+    --secondary-color: #bbb;
+  }
+
+  &.type-normal {
+    color: var(--color);
+  }
+
+  &.type-secondary {
+    color: var(--secondary-color);
+  }
+
+  &.size-normal {
+    font-size: 14px;
+  }
+
+  &.size-subcontent {
+    font-size: 12px;
+  }
+
+  &.size-title {
+    font-size: 16px;
+  }
+}

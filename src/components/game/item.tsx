@@ -1,8 +1,11 @@
 import Image from '@/components/image';
+import Space from '@/components/space';
+import Text from '@/components/text';
 import { getGameName, getGameTags, getPlayTime } from '@/utils/helper';
 import cn from 'classnames';
 import { useCallback, useEffect, useRef } from 'react';
-import styles from './item.module.css';
+import { Tag, TagGroup } from 'rsuite';
+import styles from './item.module.less';
 
 type ListItemProps = {
   item: Game.App;
@@ -14,6 +17,10 @@ type ListItemProps = {
   onSelect?: (item: Game.App) => void;
 
   onHover?: (item: Game.App) => void;
+
+  hideAppId?: boolean;
+
+  hidePlayTime?: boolean;
 };
 
 export default function ListItem({
@@ -22,6 +29,8 @@ export default function ListItem({
   onHover,
   onSelect,
   index,
+  hideAppId = false,
+  hidePlayTime = false,
 }: ListItemProps) {
   const domRef = useRef<HTMLDivElement>(null);
 
@@ -52,24 +61,24 @@ export default function ListItem({
       <Image className={styles.image} src={item.icon} />
       <div className={styles.info}>
         <div className={styles.main}>
-          {appid && (
-            <span className={cn(styles.appid, styles.tagUI)} title="appid">
-              {appid}
-            </span>
-          )}
-          {playtime && (
-            <span className={cn(styles.time, styles.tagUI)} title="已游玩时间">
-              {playtime}
-            </span>
-          )}
-          <span className={styles.name}>{getGameName(item)}</span>
+          <Space gap={6} className={styles.tags}>
+            {!hideAppId && appid && (
+              <Tag color="cyan" size="sm">
+                {appid}
+              </Tag>
+            )}
+            {!hidePlayTime && playtime && (
+              <Tag color="orange" size="sm">
+                {playtime}
+              </Tag>
+            )}
+          </Space>
+          <Text className={styles.name}>{getGameName(item)}</Text>
         </div>
         <div className={styles.sub}>
-          {getGameTags(item).map((it, i) => (
-            <span key={i} className={styles.tag}>
-              {it}
-            </span>
-          ))}
+          <Text className={styles.tag} type="secondary" size="subcontent">
+            {getGameTags(item).join(' ')}
+          </Text>
         </div>
       </div>
     </div>
